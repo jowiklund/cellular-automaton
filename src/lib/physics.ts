@@ -1,4 +1,5 @@
 import { materials } from "./materials";
+import { clamp, createMaterial, entityToHex, hexToEntity } from "./parsing";
 import { RenderBuffer } from "./types";
 
 const getRelativePosition = (buffer: RenderBuffer, y: number, x: number, lookAhead: {x: number, y: number}) => {
@@ -33,7 +34,8 @@ export const calculatePhysics = (buffer: RenderBuffer) => (
     if (timer > interval) {
       for (let y = 0; y < buffer.length; y++) {
         for (let x = 0; x < buffer[y].length; x++) {
-          const material = materials[buffer[y][x]]
+          const entity = hexToEntity(buffer[y][x], materials)
+          const {material} = entity;
           if (!buffer[y + 1]) continue;
           if (Math.random() > 0.9) continue;
           if (material.type === "staticMaterial" && !material.isVisible) continue;
@@ -44,48 +46,40 @@ export const calculatePhysics = (buffer: RenderBuffer) => (
               const [newY, newX] = rules[p]
               const pos = getRelativePosition(buffer, y, x, {y: newY, x: newX})
 
-              const occupiedBy = materials[buffer[pos.y][pos.x]]
+              const occupiedBy = hexToEntity(buffer[pos.y][pos.x], materials)
 
-              if (occupiedBy.type === "physicsMaterial") {
-                if (occupiedBy.mass < material.mass) {
-                  buffer[y][x] = materials.indexOf(occupiedBy);
-                  buffer[pos.y][pos.x] = materials.indexOf(material);
+              if (material.heatLoss) {
+                if (Math.random() > 0.6) {
+                  entity.state.temperature = clamp(entity.state.temperature - material.heatLoss, 0, 255);
+                  buffer[y][x] = entityToHex(entity)
+                }
+              }
+
+              if (material.temperatureConversion) {
+                if (entity.state.temperature === material.temperatureConversion[0]) {
+                  buffer[y][x] = createMaterial(material.temperatureConversion[1], materials, entity.state.temperature);
+                  continue;
+                }
+              }
+
+              if (material.heatTransfer) {
+                occupiedBy.state.temperature = clamp(occupiedBy.state.temperature + entity.state.temperature, 0, 255);
+              }
+
+              if (occupiedBy.material.type === "physicsMaterial") {
+                if (occupiedBy.material.mass < material.mass) {
+                  buffer[y][x] = entityToHex(occupiedBy);
+                  buffer[pos.y][pos.x] = entityToHex(entity)
                   break;
                 }
               }
 
-              if (occupiedBy.type === "staticMaterial" && !occupiedBy.isVisible) {
-                buffer[y][x] = 0;
-                buffer[pos.y][pos.x] = materials.indexOf(material);
+              if (occupiedBy.material.type === "staticMaterial" && !occupiedBy.material.isVisible) {
+                buffer[y][x] = createMaterial(0, materials);
+                buffer[pos.y][pos.x] = entityToHex(entity);
                 break;
               }
             }
-
-            // if (!buffer[y + 1]) continue;
-            // const below = getRelativePosition(buffer, y, x, {y: 1, x: 0})
-            // if (buffer[below.y][below.x] === 0) {
-            //   buffer[y][x] = 0
-            //   buffer[below.y][below.x] = materials.indexOf(material)
-            //   continue;
-            // }
-            //
-            // const downLeft = buffer[y+1][x-1]
-            // if (downLeft !== undefined) {
-            //   if (downLeft === 0) {
-            //     buffer[y][x] = 0
-            //     buffer[y + 1][x - 1] = materials.indexOf(material)
-            //     continue;
-            //   }
-            // }
-            //
-            // const downRight = buffer[y+1][x+1]
-            // if (downRight !== undefined) {
-            //   if (downRight === 0) {
-            //     buffer[y][x] = 0
-            //     buffer[y + 1][x + 1] = materials.indexOf(material)
-            //     continue;
-            //   }
-            // }
           }
         }
       }
