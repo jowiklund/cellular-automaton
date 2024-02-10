@@ -1,27 +1,26 @@
 import { materials } from "./materials";
-import { createMaterial, hexToEntity } from "./parsing";
+import { createMaterial, hexToEntity } from "./util";
 import { calculatePhysics } from "./physics";
-import { RenderBuffer, Material } from "./types";
+import { RenderBuffer } from "./types";
 
 type CTX = CanvasRenderingContext2D;
-
-let lastTime = 0;
-let interval = 1000/120;
-let timer = 0;
 
 function colorChannelMixer(colorChannelA: number, colorChannelB: number, amountToMix: number){
     const channelA: number = colorChannelA*amountToMix;
     const channelB: number = colorChannelB*(1-amountToMix);
     return Math.floor(channelA + channelB);
 }
-//rgbA and rgbB are arrays, amountToMix ranges from 0.0 to 1.0
-//example (red): rgbA = [255,0,0]
+
 function colorMixer(rgbA: number[], rgbB: number[], amountToMix: number){
     const r = colorChannelMixer(rgbA[0],rgbB[0],amountToMix);
     const g = colorChannelMixer(rgbA[1],rgbB[1],amountToMix);
     const b = colorChannelMixer(rgbA[2],rgbB[2],amountToMix);
     return [r,g,b]
 }
+
+let lastTime = 0;
+let interval = 1000/10;
+let timer = 0;
 
 const createRenderer = (ctx: CTX, width: number, height: number, resolution: number, timeStamp: number) => (buffer: RenderBuffer) => {
   const deltaTime = timeStamp - lastTime;
@@ -57,7 +56,7 @@ export function run(ctx: CTX, width: number, height: number) {
 
   const materialSelector = document.querySelector("#material") as HTMLInputElement;
 
-  materials.forEach((m, index) => {
+  materials.forEach((m) => {
     const el = document.createElement("option")
     el.innerHTML = `${m.name}`
     el.value = `${m.id}`
@@ -70,7 +69,6 @@ export function run(ctx: CTX, width: number, height: number) {
   })
 
   const draw = (e: MouseEvent) => {
-    let size = 3;
     const x = Math.floor(e.x / resolution);
     const y = Math.floor(e.y / resolution);
     buffer[y-1][x] = material
@@ -92,7 +90,7 @@ export function run(ctx: CTX, width: number, height: number) {
     window.removeEventListener("mousemove", draw)
   })
 
-  calculatePhysics(buffer)(0)
+  calculatePhysics(buffer, materials)(0)
   const render = createRenderer(ctx, width, height, resolution, 0)
   render(buffer)
 }

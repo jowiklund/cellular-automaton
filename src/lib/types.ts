@@ -9,13 +9,13 @@ export type PhysicsMaterialSubtype = Solid | Liquid | Gas
 export type MaterialBase = {
   id: number,
   color: RGB,
-  maxHeatColor?: RGB,
   name: string,
+  conductivity: number
+  maxHeatColor?: RGB,
   heatConversions?: [temp: number, materialId: number][]
   coldConversions?: [temp: number, materialId: number][]
-  contactConversions?: [contactWith: number, creates: number][]
-  heatTransfer?: number
-  heatLoss?: number
+  reactons?: [contactWith: number, creates: number][]
+  heatRetention?: number
   initialTemp?: number
 }
 
@@ -35,7 +35,7 @@ type Gas = {
 
 export type PhysicsMaterial = MaterialBase & {
   type: "physicsMaterial"
-  mass: number
+  density: number
   attemptToFill: [ y: number, x:number ][]
   subtype: PhysicsMaterialSubtype
 }

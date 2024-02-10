@@ -24,8 +24,6 @@ export const getRelativePosition = (buffer: RenderBuffer, y: number, x: number, 
   return { x: newX, y: newY }
 }
 
-
-
 export function parseHexTriplet(hex: string): [number, number, number] {
   const pattern = /([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/
   const result = pattern.exec(hex)
