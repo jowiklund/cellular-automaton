@@ -23,7 +23,10 @@ export const STONE: Solid = {
   mass: 1,
   friction: 0.3,
   color: [125,125,125],
+  maxHeatColor: [180,30,15],
   heatTransfer: 10,
+  heatLoss: 1,
+  heatConversion: [255, 8],
   attemptToFill: [
     [1,0],
     [5,1],
@@ -56,7 +59,8 @@ export const WATER: Liquid = {
   mass: 0.2,
   color: [0,100,230],
   viscosity: 0.0,
-  temperatureConversion: [255, 7],
+  initialTemp: 1,
+  heatConversion: [100, 7],
   attemptToFill: [
     [1,0],
     [0,1],
@@ -77,8 +81,8 @@ export const LAVA: Liquid = {
   viscosity: 0.0,
   heatTransfer: 10,
   heatLoss: 1,
-  temperatureConversion: [0, 3],
-  initialHeat: 255,
+  coldConversion: [0, 3],
+  initialTemp: 255,
   attemptToFill: [
     [1,0],
     [0,1],
@@ -97,8 +101,8 @@ export const WATER_VAPOUR: Gas = {
   density: 0.1,
   mass: 0,
   color: [150,150,150],
-  temperatureConversion: [0, 2],
-  initialHeat: 255,
+  coldConversion: [0, 2],
+  initialTemp: 255,
   heatLoss: 1,
   attemptToFill: [
     [-1,0],
@@ -128,7 +132,46 @@ export const GOO: Liquid = {
   ]
 }
 
+export const FIRE: Gas = {
+  id: 9,
+  name: "Fire",
+  type: "physicsMaterial",
+  subtype: "gas",
+  density: 0.1,
+  mass: 0,
+  color: [235, 106, 7],
+  maxHeatColor: [255,255,255],
+  coldConversion: [0, 10],
+  initialTemp: 255,
+  heatLoss: 10,
+  attemptToFill: [
+    [-1,0],
+    [0,1],
+    [0,-1],
+    [-1,1],
+    [-1,-1],
+  ]
+}
 
+export const SMOKE: Gas = {
+  id: 10,
+  name: "Smoke",
+  type: "physicsMaterial",
+  subtype: "gas",
+  density: 0.1,
+  mass: 0,
+  color: [200,200,200],
+  coldConversion: [0, 0],
+  initialTemp: 220,
+  heatLoss: 10,
+  attemptToFill: [
+    [-1,0],
+    [0,1],
+    [0,-1],
+    [-1,1],
+    [-1,-1],
+  ]
+}
 
 export function parseMaterialState(state: MaterialState, materials: Material[]): Entity {
   const data = state.split(",").map(parseInt);
@@ -141,4 +184,4 @@ export function parseMaterialState(state: MaterialState, materials: Material[]):
   }
 }
 
-export const materials: Material[] = [AIR, SAND, STONE, WATER, GOO, STATIC_STONE, WATER_VAPOUR, LAVA]
+export const materials: Material[] = [AIR, SAND, STONE, WATER, GOO, STATIC_STONE, WATER_VAPOUR, LAVA, FIRE, SMOKE]

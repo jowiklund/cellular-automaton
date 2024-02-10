@@ -36,35 +36,60 @@ export const calculatePhysics = (buffer: RenderBuffer) => (
         for (let x = 0; x < buffer[y].length; x++) {
           const entity = hexToEntity(buffer[y][x], materials)
           const {material} = entity;
-          if (!buffer[y + 1]) continue;
           if (Math.random() > 0.9) continue;
           if (material.type === "staticMaterial" && !material.isVisible) continue;
 
           if (material.type === "physicsMaterial") {
             const rules = material.attemptToFill;
+
+            if (material.heatLoss) {
+                entity.state.temperature = clamp(entity.state.temperature - material.heatLoss, 0, 255);
+                buffer[y][x] = entityToHex(entity)
+            }
+
+            if (material.heatConversion) {
+              if (entity.state.temperature >= material.heatConversion[0]) {
+                buffer[y][x] = createMaterial(material.heatConversion[1], materials, entity.state.temperature);
+                continue;
+              }
+            }
+
+            if (material.coldConversion) {
+              if (entity.state.temperature <= material.coldConversion[0]) {
+                buffer[y][x] = createMaterial(material.coldConversion[1], materials, entity.state.temperature);
+                continue;
+              }
+            }
+
+            const neighbors = [
+              [-1, 0],
+              [1, 0],
+              [0, -1],
+              [0, 1],
+            ];
+
+            if (entity.state.temperature > 0) {
+              for (let n = 0; n < neighbors.length; n++) {
+                const [nY, nX] = neighbors[n];
+                const pos = getRelativePosition(buffer, y, x, {y: nY, x: nX});
+                if (pos.x === x && pos.y === y) continue;
+                const nEntity = hexToEntity(buffer[pos.y][pos.x], materials)
+                if (nEntity.material.type !== "physicsMaterial") continue;
+                if (nEntity.material.id === material.id) continue;
+                nEntity.state.temperature = clamp(nEntity.state.temperature + Math.floor(entity.state.temperature / 2), 0, 255)
+                buffer[pos.y][pos.x] = entityToHex(nEntity)
+                entity.state.temperature = Math.floor(entity.state.temperature * 0.5);
+                buffer[y][x] = entityToHex(entity)
+              }
+            }
+
+            if (!buffer[y + 1]) continue;
+
             for (let p = 0; p < rules.length; p++) {
               const [newY, newX] = rules[p]
               const pos = getRelativePosition(buffer, y, x, {y: newY, x: newX})
 
               const occupiedBy = hexToEntity(buffer[pos.y][pos.x], materials)
-
-              if (material.heatLoss) {
-                if (Math.random() > 0.6) {
-                  entity.state.temperature = clamp(entity.state.temperature - material.heatLoss, 0, 255);
-                  buffer[y][x] = entityToHex(entity)
-                }
-              }
-
-              if (material.temperatureConversion) {
-                if (entity.state.temperature === material.temperatureConversion[0]) {
-                  buffer[y][x] = createMaterial(material.temperatureConversion[1], materials, entity.state.temperature);
-                  continue;
-                }
-              }
-
-              if (material.heatTransfer) {
-                occupiedBy.state.temperature = clamp(occupiedBy.state.temperature + entity.state.temperature, 0, 255);
-              }
 
               if (occupiedBy.material.type === "physicsMaterial") {
                 if (occupiedBy.material.mass < material.mass) {

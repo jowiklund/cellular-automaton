@@ -2,14 +2,18 @@ export type RenderBuffer = string[][];
 
 export type MaterialState = `${number},${number},${number}`
 
+type RGB = [number, number, number];
+
 export type MaterialBase = {
   id: number,
-  color: [number, number, number],
+  color: RGB,
+  maxHeatColor?: RGB,
   name: string,
-  temperatureConversion?: [temp: number, materialId: number]
+  heatConversion?: [temp: number, materialId: number]
+  coldConversion?: [temp: number, materialId: number]
   heatTransfer?: number
   heatLoss?: number
-  initialHeat?: number
+  initialTemp?: number
 }
 
 export type PhysicsMaterial = MaterialBase & {

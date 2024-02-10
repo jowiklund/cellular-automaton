@@ -40,7 +40,7 @@ export function entityToHex(entity: Entity): string {
 
 export const createMaterial = (id: number, materials: Material[], temperature?: number): string => {
   const material = materials.find(item => item.id === id) || AIR
-  return `${numberToHex(id)}${numberToHex(temperature || material.initialHeat)}00`
+  return `${numberToHex(id)}${numberToHex(temperature || material.initialTemp)}00`
 }
 
 export const clamp = (number: number, min: number, max: number) => Math.max(min, Math.min(number, max));
