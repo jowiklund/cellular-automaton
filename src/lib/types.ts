@@ -4,6 +4,8 @@ export type MaterialState = `${number},${number},${number}`
 
 type RGB = [number, number, number];
 
+export type PhysicsMaterialSubtype = Solid | Liquid | Gas
+
 export type MaterialBase = {
   id: number,
   color: RGB,
@@ -17,26 +19,25 @@ export type MaterialBase = {
   initialTemp?: number
 }
 
+type Solid = {
+  type: "solid",
+  friction: number
+}
+
+type Liquid = {
+  type: "liquid"
+  viscosity: number
+}
+
+type Gas = {
+  type: "gas"
+}
+
 export type PhysicsMaterial = MaterialBase & {
   type: "physicsMaterial"
   mass: number
   attemptToFill: [ y: number, x:number ][]
-}
-
-export type Solid = PhysicsMaterial & {
-  subtype: "solid"
-  friction: number
-}
-
-export type Liquid = PhysicsMaterial & {
-  subtype: "liquid"
-  viscosity: number
-  density: number
-}
-
-export type Gas = PhysicsMaterial & {
-  subtype: "gas"
-  density: number
+  subtype: PhysicsMaterialSubtype
 }
 
 export type StaticMaterial = MaterialBase & {

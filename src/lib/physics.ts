@@ -16,7 +16,6 @@ export const calculatePhysics = (buffer: RenderBuffer) => (
           const entity = hexToEntity(buffer[y][x], materials)
           const {material} = entity;
 
-
           if (material.heatLoss && Math.random() > 0.5) {
             entity.state.temperature = clamp(entity.state.temperature - material.heatLoss, 0, 255);
             buffer[y][x] = entityToHex(entity)
@@ -100,10 +99,12 @@ export const calculatePhysics = (buffer: RenderBuffer) => (
               const occupiedBy = hexToEntity(buffer[pos.y][pos.x], materials)
 
               if (occupiedBy.material.type === "physicsMaterial") {
-                if (occupiedBy.material.mass < material.mass) {
-                  buffer[y][x] = entityToHex(occupiedBy);
-                  buffer[pos.y][pos.x] = entityToHex(entity)
-                  break;
+                if (occupiedBy.material.subtype.type === "liquid") {
+                  if (occupiedBy.material.mass < material.mass) {
+                    buffer[y][x] = entityToHex(occupiedBy);
+                    buffer[pos.y][pos.x] = entityToHex(entity)
+                    break;
+                  }
                 }
               }
 

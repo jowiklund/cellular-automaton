@@ -1,12 +1,14 @@
-import { Entity, Gas, Liquid, Material, MaterialState, Solid, StaticMaterial } from "./types"
+import { Entity, Material, MaterialState } from "./types"
 
-export const SAND: Solid = {
+export const SAND: Material = {
   id: 1,
   name: "Sand",
   type: "physicsMaterial",
-  subtype: "solid",
+  subtype: {
+    type: "solid",
+    friction: 0
+  },
   mass: 0.6,
-  friction: 0.3,
   color: [217,175,61],
   attemptToFill: [
     [1,0],
@@ -15,13 +17,15 @@ export const SAND: Solid = {
   ]
 }
 
-export const STONE: Solid = {
+export const STONE: Material = {
   id: 3,
   name: "Stone",
   type: "physicsMaterial",
-  subtype: "solid",
+  subtype: {
+    type: "solid",
+    friction: 50
+  },
   mass: 1,
-  friction: 0.3,
   color: [125,125,125],
   maxHeatColor: [191, 45, 15],
   heatTransfer: 10,
@@ -32,7 +36,7 @@ export const STONE: Solid = {
   ]
 }
 
-export const AIR: StaticMaterial = {
+export const AIR: Material = {
   id: 0,
   name: "Air",
   type: "staticMaterial",
@@ -40,7 +44,7 @@ export const AIR: StaticMaterial = {
   isVisible: false
 }
 
-export const STATIC_STONE: StaticMaterial = {
+export const STATIC_STONE: Material = {
   id: 4,
   name: "Static stone",
   type: "staticMaterial",
@@ -50,15 +54,16 @@ export const STATIC_STONE: StaticMaterial = {
   heatLoss: 1,
 }
 
-export const WATER: Liquid = {
+export const WATER: Material = {
   id: 2,
   name: "Water",
   type: "physicsMaterial",
-  subtype: "liquid",
-  density: 0.5,
+  subtype: {
+    type: "liquid",
+    viscosity: 0
+  },
   mass: 0.3,
   color: [0,100,230],
-  viscosity: 0.0,
   initialTemp: 1,
   heatConversions: [[30, 7]],
   attemptToFill: [
@@ -70,15 +75,16 @@ export const WATER: Liquid = {
   ]
 }
 
-export const SALT_WATER: Liquid = {
+export const SALT_WATER: Material = {
   id: 11,
   name: "Salt water",
   type: "physicsMaterial",
-  subtype: "liquid",
-  density: 0.5,
+  subtype: {
+    type: "liquid",
+    viscosity: 0
+  },
   mass: 0.2,
   color: [180,180,230],
-  viscosity: 0.0,
   initialTemp: 1,
   heatConversions: [[100, 7], [100, 12]],
   attemptToFill: [
@@ -90,13 +96,15 @@ export const SALT_WATER: Liquid = {
   ]
 }
 
-export const SALT: Solid = {
+export const SALT: Material = {
   id: 12,
   name: "Salt",
   type: "physicsMaterial",
-  subtype: "solid",
+  subtype: {
+    type: "solid",
+    friction: 25
+  },
   mass: 0.4,
-  friction: 0.3,
   color: [230,230,230],
   maxHeatColor: [255,140,140],
   contactConversions: [[2, 11]],
@@ -108,15 +116,16 @@ export const SALT: Solid = {
   ]
 }
 
-export const MOLTEN_SALT: Liquid = {
+export const MOLTEN_SALT: Material = {
   id: 13,
   name: "Molten salt",
   type: "physicsMaterial",
-  subtype: "liquid",
-  density: 1,
+  subtype: {
+    type: "liquid",
+    viscosity: 0
+  },
   mass: 0.4,
   color: [180,130,130],
-  viscosity: 0.0,
   heatTransfer: 10,
   heatLoss: 0,
   coldConversions: [[0, 12]],
@@ -130,15 +139,16 @@ export const MOLTEN_SALT: Liquid = {
   ]
 }
 
-export const OIL: Liquid = {
+export const OIL: Material = {
   id: 14,
   name: "Oil",
   type: "physicsMaterial",
-  subtype: "liquid",
-  density: 1,
+  subtype: {
+    type: "liquid",
+    viscosity: 25
+  },
   mass: 0.1,
   color: [30,60,30],
-  viscosity: 0.0,
   heatTransfer: 10,
   heatLoss: 0,
   heatConversions: [[110, 9]],
@@ -154,15 +164,16 @@ export const OIL: Liquid = {
 }
 
 
-export const LAVA: Liquid = {
+export const LAVA: Material = {
   id: 8,
   name: "Lava",
   type: "physicsMaterial",
-  subtype: "liquid",
-  density: 1,
+  subtype: {
+    type: "liquid",
+    viscosity: 50
+  },
   mass: 0.9,
   color: [191, 45, 15],
-  viscosity: 0.0,
   heatTransfer: 10,
   heatLoss: 1,
   maxHeatColor: [245, 152, 91],
@@ -178,12 +189,13 @@ export const LAVA: Liquid = {
 }
 
 
-export const WATER_VAPOUR: Gas = {
+export const WATER_VAPOUR: Material = {
   id: 7,
   name: "Water vapour",
   type: "physicsMaterial",
-  subtype: "gas",
-  density: 0.1,
+  subtype: {
+    type: "gas",
+  },
   mass: 0,
   color: [150,150,150],
   coldConversions: [[0, 2]],
@@ -199,15 +211,16 @@ export const WATER_VAPOUR: Gas = {
 }
 
 
-export const GOO: Liquid = {
+export const GOO: Material = {
   id: 6,
   name: "Goo",
   type: "physicsMaterial",
-  subtype: "liquid",
-  density: 1,
+  subtype: {
+    type: "liquid",
+    viscosity: 25
+  },
   mass: 0.3,
   color: [40,200,40],
-  viscosity: 0.0,
   attemptToFill: [
     [1,0],
     [0,1],
@@ -217,12 +230,13 @@ export const GOO: Liquid = {
   ]
 }
 
-export const FIRE: Gas = {
+export const FIRE: Material = {
   id: 9,
   name: "Fire",
   type: "physicsMaterial",
-  subtype: "gas",
-  density: 0.1,
+  subtype: {
+    type: "gas"
+  },
   mass: 0,
   color: [235, 106, 7],
   maxHeatColor: [255,255,255],
@@ -238,12 +252,13 @@ export const FIRE: Gas = {
   ]
 }
 
-export const SMOKE: Gas = {
+export const SMOKE: Material = {
   id: 10,
   name: "Smoke",
   type: "physicsMaterial",
-  subtype: "gas",
-  density: 0.1,
+  subtype: {
+    type: "gas"
+  },
   mass: 0,
   color: [80,80,80],
   coldConversions: [[0, 0]],

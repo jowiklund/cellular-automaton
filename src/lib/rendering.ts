@@ -51,7 +51,7 @@ const createRenderer = (ctx: CTX, width: number, height: number, resolution: num
 }
 
 export function run(ctx: CTX, width: number, height: number) {
-  const resolution = 5;
+  const resolution = 8;
   const getRes = (resolution: number, value: number) => Math.floor(value/resolution)
   const buffer = [...Array(getRes(resolution, height))].map((_) => Array(getRes(resolution, width)).fill(createMaterial(0, materials)))
 
