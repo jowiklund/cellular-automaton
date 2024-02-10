@@ -54,7 +54,7 @@ export const STONE: Material = {
   id: 3,
   name: "Stone",
   type: "physicsMaterial",
-  conductivity: 10,
+  conductivity: 30,
   subtype: {
     type: "solid",
     friction: 50
@@ -329,7 +329,7 @@ export const METAL: Material = {
   conductivity: 60,
   color: [43, 49, 51],
   maxHeatColor: [125, 53, 44],
-  heatRetention: 230,
+  heatRetention: 235,
   heatConversions: [[200, 16]],
   attemptToFill: [
     [1,0],

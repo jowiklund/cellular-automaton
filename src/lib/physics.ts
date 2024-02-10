@@ -18,7 +18,6 @@ function doHeatDissipation(
   materials: Material[]
 ) {
   if (entity.state.temperature === 0) return;
-  const AMBIANCE = 10;
   const read = createReader(buffer, materials)
   const write = createWriter(buffer)
   for (let n = 0; n < neighbors.length; n++) {
@@ -33,7 +32,7 @@ function doHeatDissipation(
 
     if (neighbor.state.temperature >= entity.state.temperature) continue;
 
-    if (entity.material.id === neighbor.material.id) {
+    if (entity.material.conductivity === neighbor.material.conductivity) {
       neighbor.state.temperature = entity.state.temperature;
       continue;
     }
@@ -48,7 +47,7 @@ function doHeatDissipation(
 
   if (entity.material.heatRetention !== undefined && Math.random() > entity.material.heatRetention / 255) {
     entity.state.temperature = clamp(Math.floor(entity.state.temperature * (entity.material.heatRetention / 255)), 0, 255);
-    buffer[y][x] = entityToHex(entity)
+    write(y, x, entityToHex(entity))
   }
 }
 
