@@ -1,29 +1,6 @@
 import { materials } from "./materials";
-import { clamp, createMaterial, entityToHex, hexToEntity } from "./parsing";
+import { clamp, createMaterial, entityToHex, getRelativePosition, hexToEntity } from "./parsing";
 import { RenderBuffer } from "./types";
-
-const getRelativePosition = (buffer: RenderBuffer, y: number, x: number, lookAhead: {x: number, y: number}) => {
-  let newY = y + lookAhead.y
-  let newX = x + lookAhead.x
-
-  if (newY + lookAhead.y > buffer.length - 1) {
-    newY = buffer.length - 1;
-  }
-
-  if ((newY + lookAhead.y) < 0) {
-    newY = 0;
-  }
-
-  if (newX + lookAhead.x > buffer[y].length - 1) {
-    newX = buffer[y].length - 1
-  }
-
-  if (newX + lookAhead.x < 0) {
-    newX = 0
-  }
-
-  return { x: newX, y: newY }
-}
 
 export const calculatePhysics = (buffer: RenderBuffer) => (
   timeStamp: number,
@@ -31,58 +8,89 @@ export const calculatePhysics = (buffer: RenderBuffer) => (
   interval: number = 1000/120,
   timer: number = 0) => {
     const deltaTime = timeStamp - lastTime;
+    lastTime = timeStamp;
+    console.log(Math.floor(1000 / deltaTime))
     if (timer > interval) {
       for (let y = 0; y < buffer.length; y++) {
         for (let x = 0; x < buffer[y].length; x++) {
           const entity = hexToEntity(buffer[y][x], materials)
           const {material} = entity;
-          if (Math.random() > 0.9) continue;
-          if (material.type === "staticMaterial" && !material.isVisible) continue;
 
-          if (material.type === "physicsMaterial") {
-            const rules = material.attemptToFill;
 
-            if (material.heatLoss) {
-                entity.state.temperature = clamp(entity.state.temperature - material.heatLoss, 0, 255);
-                buffer[y][x] = entityToHex(entity)
-            }
+          if (material.heatLoss && Math.random() > 0.5) {
+            entity.state.temperature = clamp(entity.state.temperature - material.heatLoss, 0, 255);
+            buffer[y][x] = entityToHex(entity)
+          }
 
-            if (material.heatConversion) {
-              if (entity.state.temperature >= material.heatConversion[0]) {
-                buffer[y][x] = createMaterial(material.heatConversion[1], materials, entity.state.temperature);
+          if (material.heatConversions) {
+            for (let h = 0; h < material.heatConversions.length; h++) {
+              const rule = material.heatConversions[h]
+              if (entity.state.temperature >= rule[0]) {
+                buffer[y][x] = createMaterial(rule[1], materials, entity.state.temperature);
                 continue;
               }
             }
+          }
 
-            if (material.coldConversion) {
-              if (entity.state.temperature <= material.coldConversion[0]) {
-                buffer[y][x] = createMaterial(material.coldConversion[1], materials, entity.state.temperature);
+          if (material.coldConversions) {
+            for (let c = 0; c < material.coldConversions.length; c++) {
+              const rule = material.coldConversions[c]
+              if (entity.state.temperature <= rule[0]) {
+                buffer[y][x] = createMaterial(rule[1], materials, entity.state.temperature);
                 continue;
               }
             }
+          }
 
-            const neighbors = [
-              [-1, 0],
-              [1, 0],
-              [0, -1],
-              [0, 1],
-            ];
+          const neighbors = [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+          ];
 
-            if (entity.state.temperature > 0) {
+          if (entity.state.temperature > 0) {
+            for (let n = 0; n < neighbors.length; n++) {
+              const [nY, nX] = neighbors[n];
+              const pos = getRelativePosition(buffer, y, x, {y: nY, x: nX});
+              if (pos.x === x && pos.y === y) continue;
+              const nEntity = hexToEntity(buffer[pos.y][pos.x], materials)
+              if (nEntity.material.type === "staticMaterial" && !nEntity.material.isVisible) continue;
+              if (nEntity.state.temperature >= entity.state.temperature) continue;
+              if (entity.material.id === nEntity.material.id) {
+                nEntity.state.temperature = entity.state.temperature;
+                continue;
+              }
+              nEntity.state.temperature = clamp(nEntity.state.temperature + Math.floor(entity.state.temperature * 0.8), 0, 255)
+              buffer[pos.y][pos.x] = entityToHex(nEntity)
+              entity.state.temperature = Math.floor(entity.state.temperature * 0.2);
+              buffer[y][x] = entityToHex(entity)
+            }
+          }
+
+          if (material.contactConversions) {
+            for (let c = 0; c < material.contactConversions.length; c++) {
               for (let n = 0; n < neighbors.length; n++) {
                 const [nY, nX] = neighbors[n];
                 const pos = getRelativePosition(buffer, y, x, {y: nY, x: nX});
                 if (pos.x === x && pos.y === y) continue;
                 const nEntity = hexToEntity(buffer[pos.y][pos.x], materials)
-                if (nEntity.material.type !== "physicsMaterial") continue;
-                if (nEntity.material.id === material.id) continue;
-                nEntity.state.temperature = clamp(nEntity.state.temperature + Math.floor(entity.state.temperature / 2), 0, 255)
-                buffer[pos.y][pos.x] = entityToHex(nEntity)
-                entity.state.temperature = Math.floor(entity.state.temperature * 0.5);
-                buffer[y][x] = entityToHex(entity)
+                const [contactWith, convertToMaterial] = material.contactConversions[c]
+                if (nEntity.material.id === contactWith) {
+                  buffer[y][x] = createMaterial(convertToMaterial, materials, entity.state.temperature)
+                  if (Math.random() > 0.6) {
+                    buffer[pos.y][pos.x] = createMaterial(0, materials)
+                  }
+                  break;
+                }
               }
             }
+          }
 
+          if (Math.random() > 0.9) continue;
+          if (material.type === "staticMaterial" && !material.isVisible) continue;
+          if (material.type === "physicsMaterial") {
+            const rules = material.attemptToFill;
             if (!buffer[y + 1]) continue;
 
             for (let p = 0; p < rules.length; p++) {

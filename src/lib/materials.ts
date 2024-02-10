@@ -5,7 +5,7 @@ export const SAND: Solid = {
   name: "Sand",
   type: "physicsMaterial",
   subtype: "solid",
-  mass: 0.4,
+  mass: 0.6,
   friction: 0.3,
   color: [217,175,61],
   attemptToFill: [
@@ -23,14 +23,12 @@ export const STONE: Solid = {
   mass: 1,
   friction: 0.3,
   color: [125,125,125],
-  maxHeatColor: [180,30,15],
+  maxHeatColor: [191, 45, 15],
   heatTransfer: 10,
   heatLoss: 1,
-  heatConversion: [255, 8],
+  heatConversions: [[200, 8]],
   attemptToFill: [
     [1,0],
-    [5,1],
-    [5,-1]
   ]
 }
 
@@ -47,7 +45,9 @@ export const STATIC_STONE: StaticMaterial = {
   name: "Static stone",
   type: "staticMaterial",
   color: [80,80,80],
-  isVisible: true
+  isVisible: true,
+  maxHeatColor: [180,30,15],
+  heatLoss: 1,
 }
 
 export const WATER: Liquid = {
@@ -56,11 +56,11 @@ export const WATER: Liquid = {
   type: "physicsMaterial",
   subtype: "liquid",
   density: 0.5,
-  mass: 0.2,
+  mass: 0.3,
   color: [0,100,230],
   viscosity: 0.0,
   initialTemp: 1,
-  heatConversion: [100, 7],
+  heatConversions: [[30, 7]],
   attemptToFill: [
     [1,0],
     [0,1],
@@ -70,6 +70,90 @@ export const WATER: Liquid = {
   ]
 }
 
+export const SALT_WATER: Liquid = {
+  id: 11,
+  name: "Salt water",
+  type: "physicsMaterial",
+  subtype: "liquid",
+  density: 0.5,
+  mass: 0.2,
+  color: [180,180,230],
+  viscosity: 0.0,
+  initialTemp: 1,
+  heatConversions: [[100, 7], [100, 12]],
+  attemptToFill: [
+    [1,0],
+    [0,1],
+    [0,-1],
+    [1,1],
+    [1,-1],
+  ]
+}
+
+export const SALT: Solid = {
+  id: 12,
+  name: "Salt",
+  type: "physicsMaterial",
+  subtype: "solid",
+  mass: 0.4,
+  friction: 0.3,
+  color: [230,230,230],
+  maxHeatColor: [255,140,140],
+  contactConversions: [[2, 11]],
+  heatConversions: [[255, 13]],
+  attemptToFill: [
+    [1,0],
+    [1,1],
+    [1,-1],
+  ]
+}
+
+export const MOLTEN_SALT: Liquid = {
+  id: 13,
+  name: "Molten salt",
+  type: "physicsMaterial",
+  subtype: "liquid",
+  density: 1,
+  mass: 0.4,
+  color: [180,130,130],
+  viscosity: 0.0,
+  heatTransfer: 10,
+  heatLoss: 0,
+  coldConversions: [[0, 12]],
+  initialTemp: 255,
+  attemptToFill: [
+    [1,0],
+    [0,1],
+    [0,-1],
+    [1,1],
+    [1,-1],
+  ]
+}
+
+export const OIL: Liquid = {
+  id: 14,
+  name: "Oil",
+  type: "physicsMaterial",
+  subtype: "liquid",
+  density: 1,
+  mass: 0.1,
+  color: [30,60,30],
+  viscosity: 0.0,
+  heatTransfer: 10,
+  heatLoss: 0,
+  heatConversions: [[110, 9]],
+  contactConversions: [[9, 9]],
+  initialTemp: 0,
+  attemptToFill: [
+    [1,0],
+    [0,1],
+    [0,-1],
+    [1,1],
+    [1,-1],
+  ]
+}
+
+
 export const LAVA: Liquid = {
   id: 8,
   name: "Lava",
@@ -77,11 +161,12 @@ export const LAVA: Liquid = {
   subtype: "liquid",
   density: 1,
   mass: 0.9,
-  color: [180,30,15],
+  color: [191, 45, 15],
   viscosity: 0.0,
   heatTransfer: 10,
   heatLoss: 1,
-  coldConversion: [0, 3],
+  maxHeatColor: [245, 152, 91],
+  coldConversions: [[0, 3]],
   initialTemp: 255,
   attemptToFill: [
     [1,0],
@@ -101,7 +186,7 @@ export const WATER_VAPOUR: Gas = {
   density: 0.1,
   mass: 0,
   color: [150,150,150],
-  coldConversion: [0, 2],
+  coldConversions: [[0, 2]],
   initialTemp: 255,
   heatLoss: 1,
   attemptToFill: [
@@ -141,9 +226,9 @@ export const FIRE: Gas = {
   mass: 0,
   color: [235, 106, 7],
   maxHeatColor: [255,255,255],
-  coldConversion: [0, 10],
+  coldConversions: [[0, 10]],
   initialTemp: 255,
-  heatLoss: 10,
+  heatLoss: 8,
   attemptToFill: [
     [-1,0],
     [0,1],
@@ -160,8 +245,8 @@ export const SMOKE: Gas = {
   subtype: "gas",
   density: 0.1,
   mass: 0,
-  color: [200,200,200],
-  coldConversion: [0, 0],
+  color: [80,80,80],
+  coldConversions: [[0, 0]],
   initialTemp: 220,
   heatLoss: 10,
   attemptToFill: [
@@ -184,4 +269,4 @@ export function parseMaterialState(state: MaterialState, materials: Material[]):
   }
 }
 
-export const materials: Material[] = [AIR, SAND, STONE, WATER, GOO, STATIC_STONE, WATER_VAPOUR, LAVA, FIRE, SMOKE]
+export const materials: Material[] = [AIR, SAND, SALT, SALT_WATER, STONE, WATER, GOO, STATIC_STONE, WATER_VAPOUR, LAVA, FIRE, SMOKE, MOLTEN_SALT, OIL]

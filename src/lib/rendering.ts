@@ -51,7 +51,7 @@ const createRenderer = (ctx: CTX, width: number, height: number, resolution: num
 }
 
 export function run(ctx: CTX, width: number, height: number) {
-  const resolution = 8;
+  const resolution = 5;
   const getRes = (resolution: number, value: number) => Math.floor(value/resolution)
   const buffer = [...Array(getRes(resolution, height))].map((_) => Array(getRes(resolution, width)).fill(createMaterial(0, materials)))
 
@@ -73,11 +73,15 @@ export function run(ctx: CTX, width: number, height: number) {
     let size = 3;
     const x = Math.floor(e.x / resolution);
     const y = Math.floor(e.y / resolution);
-    buffer[y-1][x] = material;
+    buffer[y-1][x] = material
+    buffer[y-1][x-1] = material
+    buffer[y-1][x+1] = material
     buffer[y][x] = material
     buffer[y][x+1] = material
     buffer[y][x-1] = material
     buffer[y+1][x] = material
+    buffer[y+1][x-1] = material
+    buffer[y+1][x+1] = material
   }
 
   window.addEventListener("mousedown", (e) => {

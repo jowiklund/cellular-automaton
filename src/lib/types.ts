@@ -9,8 +9,9 @@ export type MaterialBase = {
   color: RGB,
   maxHeatColor?: RGB,
   name: string,
-  heatConversion?: [temp: number, materialId: number]
-  coldConversion?: [temp: number, materialId: number]
+  heatConversions?: [temp: number, materialId: number][]
+  coldConversions?: [temp: number, materialId: number][]
+  contactConversions?: [contactWith: number, creates: number][]
   heatTransfer?: number
   heatLoss?: number
   initialTemp?: number
