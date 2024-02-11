@@ -1,5 +1,6 @@
 import { clamp, createMaterial, entityToHex, getRelativePosition, hexToEntity } from "./util";
 import { Entity, Material, RenderBuffer } from "./types";
+import { AMBIANCE, MAX_INT } from "./constants";
 
 const createWriter = (buffer: RenderBuffer) => (y: number, x: number, hex: string): void => {
   buffer[y][x] = hex;
@@ -20,33 +21,35 @@ function doHeatDissipation(
   if (entity.state.temperature === 0) return;
   const read = createReader(buffer, materials)
   const write = createWriter(buffer)
-  for (let n = 0; n < neighbors.length; n++) {
-    const [nY, nX] = neighbors[n];
+  for (let i = 0; i < neighbors.length; i++) {
+    const [nY, nX] = neighbors[i];
     const neighborPosition = getRelativePosition(buffer, y, x, {y: nY, x: nX});
 
     if (neighborPosition.x === x && neighborPosition.y === y) continue;
 
-    const neighbor = read(neighborPosition.y, neighborPosition.x)
+    const n = read(neighborPosition.y, neighborPosition.x)
 
-    if (neighbor.material.type === "staticMaterial" && !neighbor.material.isVisible) continue;
+    if (n.material.type === "staticMaterial" && !n.material.isVisible) continue;
 
-    if (neighbor.state.temperature >= entity.state.temperature) continue;
+    if (n.state.temperature > entity.state.temperature) continue;
 
-    if (entity.material.conductivity === neighbor.material.conductivity) {
-      neighbor.state.temperature = entity.state.temperature;
-      continue;
-    }
+    const nC = n.material.conductivity / MAX_INT;
 
-    const conductivity = neighbor.material.conductivity / 255;
-    neighbor.state.temperature = clamp(neighbor.state.temperature + Math.floor(entity.state.temperature * conductivity), 0, 255)
-    write(neighborPosition.y, neighborPosition.x, entityToHex(neighbor))
+    const heatTransfer = Math.floor(Math.sqrt(entity.state.temperature * nC));
 
-    entity.state.temperature = clamp(Math.floor(entity.state.temperature * (1 - conductivity)), 0, 255);
+    entity.state.temperature = clamp(entity.state.temperature - heatTransfer, AMBIANCE, MAX_INT);
     write(y, x, entityToHex(entity))
+
+    n.state.temperature = clamp(n.state.temperature + heatTransfer, 0, MAX_INT)
+    write(neighborPosition.y, neighborPosition.x, entityToHex(n))
   }
 
-  if (entity.material.heatRetention !== undefined && Math.random() > entity.material.heatRetention / 255) {
-    entity.state.temperature = clamp(Math.floor(entity.state.temperature * (entity.material.heatRetention / 255)), 0, 255);
+  if (entity.material.heatRetention !== undefined && Math.random() > entity.material.heatRetention / MAX_INT) {
+    if (entity.state.temperature > AMBIANCE) {
+      entity.state.temperature = clamp(Math.floor(entity.state.temperature - Math.sqrt(entity.state.temperature * entity.material.heatRetention / MAX_INT)), AMBIANCE, MAX_INT);
+    } else {
+      entity.state.temperature = clamp(entity.state.temperature + Math.floor(Math.sqrt(AMBIANCE - entity.state.temperature)), 0, MAX_INT)
+    }
     write(y, x, entityToHex(entity))
   }
 }
@@ -116,7 +119,7 @@ export const calculatePhysics = (buffer: RenderBuffer, materials: Material[]) =>
   timer: number = 0) => {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
-    console.log(Math.floor(1000 / deltaTime))
+    //console.log(Math.floor(1000 / deltaTime))
     if (timer > interval) {
       for (let y = 0; y < buffer.length; y++) {
         for (let x = 0; x < buffer[y].length; x++) {
@@ -125,9 +128,9 @@ export const calculatePhysics = (buffer: RenderBuffer, materials: Material[]) =>
           if (material.type === "staticMaterial" && !material.isVisible) continue;
 
           const neighbors: [number,number][] = [
-            [-1, 0],
             [1, 0],
             [0, -1],
+            [-1, 0],
             [0, 1],
           ];
 
@@ -139,7 +142,6 @@ export const calculatePhysics = (buffer: RenderBuffer, materials: Material[]) =>
           doReactons(buffer, x, y, entity, neighbors, materials)
 
           if (Math.random() > 0.9) continue;
-
 
           if (material.type === "physicsMaterial") {
             const rules = material.attemptToFill;

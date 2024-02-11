@@ -1,5 +1,7 @@
+import { AMBIANCE, MAX_INT } from "./constants"
 import { Entity, Material, MaterialState } from "./types"
 
+const percent = (value: number) => MAX_INT * value
 
 export const AIR: Material = {
   id: 0,
@@ -32,15 +34,17 @@ export const WATER: Material = {
   id: 2,
   name: "Water",
   type: "physicsMaterial",
-  conductivity: 200,
+  conductivity: percent(0.8),
   subtype: {
     type: "liquid",
     viscosity: 0
   },
   density: 50,
   color: [0,100,230],
-  initialTemp: 1,
-  heatConversions: [[30, 7]],
+  initialTemp: 300,
+  heatRetention: percent(0.5),
+  heatConversions: [[373, 4]],
+  coldConversions: [[273, 3]],
   attemptToFill: [
     [1,0],
     [0,1],
@@ -50,58 +54,20 @@ export const WATER: Material = {
   ]
 }
 
-export const STONE: Material = {
+export const ICE: Material = {
   id: 3,
-  name: "Stone",
-  type: "physicsMaterial",
-  conductivity: 30,
-  subtype: {
-    type: "solid",
-    friction: 50
-  },
-  density: 100,
-  color: [125,125,125],
-  maxHeatColor: [191, 45, 15],
-  heatRetention: 200,
-  heatConversions: [[200, 8]],
-  attemptToFill: [
-    [1,0],
-  ]
-}
-
-export const STATIC_STONE: Material = {
-  id: 4,
-  name: "Static stone",
+  name: "Ice",
   type: "staticMaterial",
-  conductivity: 10,
-  color: [80,80,80],
+  conductivity: percent(0.9),
+  color: [0,60,80],
   isVisible: true,
-  maxHeatColor: [180,30,15],
-  heatRetention: 250,
-}
-
-export const GOO: Material = {
-  id: 6,
-  name: "Goo",
-  type: "physicsMaterial",
-  conductivity: 10,
-  subtype: {
-    type: "liquid",
-    viscosity: 25
-  },
-  density: 30,
-  color: [40,200,40],
-  attemptToFill: [
-    [1,0],
-    [0,1],
-    [0,-1],
-    [1,1],
-    [1,-1],
-  ]
+  heatRetention: percent(0.5),
+  initialTemp: 250,
+  heatConversions: [[274, 2]]
 }
 
 export const WATER_VAPOUR: Material = {
-  id: 7,
+  id: 4,
   name: "Water vapour",
   type: "physicsMaterial",
   conductivity: 0,
@@ -110,191 +76,33 @@ export const WATER_VAPOUR: Material = {
   },
   density: 0,
   color: [150,150,200],
-  coldConversions: [[15, 2]],
-  initialTemp: 255,
-  heatRetention: 240,
+  coldConversions: [[372, 2]],
+  initialTemp: 400,
+  heatRetention: percent(0.95),
   attemptToFill: [
     [-1,0],
     [0,1],
     [0,-1],
     [-1,1],
     [-1,-1],
-  ]
-}
-
-export const LAVA: Material = {
-  id: 8,
-  name: "Lava",
-  type: "physicsMaterial",
-  conductivity: 200,
-  subtype: {
-    type: "liquid",
-    viscosity: 50
-  },
-  density: 90,
-  color: [191, 45, 15],
-  heatRetention: 254,
-  maxHeatColor: [245, 152, 91],
-  coldConversions: [[150, 3]],
-  initialTemp: 255,
-  attemptToFill: [
-    [1,0],
-    [0,1],
-    [0,-1],
-    [1,1],
-    [1,-1],
-  ]
-}
-
-export const FIRE: Material = {
-  id: 9,
-  name: "Fire",
-  type: "physicsMaterial",
-  conductivity: 200,
-  subtype: {
-    type: "gas"
-  },
-  density: 0,
-  color: [235, 106, 7],
-  maxHeatColor: [255,255,255],
-  coldConversions: [[0, 10]],
-  initialTemp: 255,
-  heatRetention: 40,
-  attemptToFill: [
-    [-1,0],
-    [0,1],
-    [0,-1],
-    [-1,1],
-    [-1,-1],
-  ]
-}
-
-export const SMOKE: Material = {
-  id: 10,
-  name: "Smoke",
-  type: "physicsMaterial",
-  conductivity: 50,
-  subtype: {
-    type: "gas"
-  },
-  density: 0,
-  color: [80,80,80],
-  coldConversions: [[0, 0]],
-  initialTemp: 220,
-  heatRetention: 5,
-  attemptToFill: [
-    [-1,0],
-    [0,1],
-    [0,-1],
-    [-1,1],
-    [-1,-1],
-  ]
-}
-
-export const SALT_WATER: Material = {
-  id: 11,
-  name: "Salt water",
-  type: "physicsMaterial",
-  conductivity: 255,
-  subtype: {
-    type: "liquid",
-    viscosity: 0
-  },
-  density: 45,
-  color: [180,180,230],
-  initialTemp: 1,
-  heatConversions: [[100, 7], [100, 12]],
-  attemptToFill: [
-    [1,0],
-    [0,1],
-    [0,-1],
-    [1,1],
-    [1,-1],
-  ]
-}
-
-export const SALT: Material = {
-  id: 12,
-  name: "Salt",
-  type: "physicsMaterial",
-  conductivity: 10,
-  subtype: {
-    type: "solid",
-    friction: 25
-  },
-  density: 75,
-  color: [230,230,230],
-  maxHeatColor: [255,140,140],
-  reactons: [[2, 11]],
-  heatConversions: [[255, 13]],
-  attemptToFill: [
-    [1,0],
-    [1,1],
-    [1,-1],
-  ]
-}
-
-export const MOLTEN_SALT: Material = {
-  id: 13,
-  name: "Molten salt",
-  type: "physicsMaterial",
-  conductivity: 10,
-  subtype: {
-    type: "liquid",
-    viscosity: 0
-  },
-  density: 70,
-  color: [180,130,130],
-  heatRetention: 250,
-  coldConversions: [[0, 12]],
-  initialTemp: 255,
-  attemptToFill: [
-    [1,0],
-    [0,1],
-    [0,-1],
-    [1,1],
-    [1,-1],
-  ]
-}
-
-export const OIL: Material = {
-  id: 14,
-  name: "Oil",
-  type: "physicsMaterial",
-  conductivity: 255,
-  subtype: {
-    type: "liquid",
-    viscosity: 25
-  },
-  density: 40,
-  color: [30,60,30],
-  heatRetention: 250,
-  heatConversions: [[110, 9]],
-  reactons: [[9, 9]],
-  initialTemp: 0,
-  attemptToFill: [
-    [1,0],
-    [0,1],
-    [0,-1],
-    [1,1],
-    [1,-1],
   ]
 }
 
 export const STATIC_METAL: Material = {
-  id: 15,
+  id: 5,
   name: "Static metal",
   type: "staticMaterial",
   conductivity: 230,
   color: [43, 49, 51],
   isVisible: true,
   maxHeatColor: [125, 53, 44],
-  heatRetention: 254,
-  heatConversions: [[200, 16]]
+  maxColorTemp: 1800,
+  heatRetention: percent(0.9),
+  heatConversions: [[1800, 6]]
 }
 
 export const MOLTEN_METAL: Material = {
-  id: 16,
+  id: 6,
   name: "Molten metal",
   density: 230,
   subtype: {
@@ -302,12 +110,14 @@ export const MOLTEN_METAL: Material = {
     viscosity: 250
   },
   type: "physicsMaterial",
-  conductivity: 10,
+  conductivity: percent(0.8),
   color: [125, 53, 44],
   maxHeatColor: [255, 218, 130],
-  heatRetention: 254,
-  initialTemp: 255,
-  coldConversions: [[100, 17]],
+  heatRetention: percent(0.7),
+  initialTemp: 5000,
+  maxColorTemp: 1900,
+  minColorTemp: 1800,
+  coldConversions: [[1800, 7]],
   attemptToFill: [
     [1,0],
     [0,1],
@@ -318,7 +128,7 @@ export const MOLTEN_METAL: Material = {
 }
 
 export const METAL: Material = {
-  id: 17,
+  id: 7,
   name: "Metal",
   density: 230,
   subtype: {
@@ -326,15 +136,122 @@ export const METAL: Material = {
     friction: 100
   },
   type: "physicsMaterial",
-  conductivity: 60,
+  conductivity: percent(0.9),
   color: [43, 49, 51],
   maxHeatColor: [125, 53, 44],
-  heatRetention: 235,
-  heatConversions: [[200, 16]],
+  maxColorTemp: 1811,
+  minColorTemp: 293,
+  heatRetention: percent(0.9),
+  initialTemp: AMBIANCE,
+  heatConversions: [[1811, 6]],
   attemptToFill: [
     [1,0],
     [1,1],
     [1,-1],
+  ]
+}
+
+export const STONE: Material = {
+  id: 8,
+  name: "Stone",
+  type: "physicsMaterial",
+  conductivity: percent(0.2),
+  subtype: {
+    type: "solid",
+    friction: 50
+  },
+  density: 100,
+  color: [125,125,125],
+  maxHeatColor: [191, 45, 15],
+  maxColorTemp: 1500,
+  minColorTemp: 292,
+  initialTemp: AMBIANCE,
+  heatRetention: percent(0.9),
+  heatConversions: [[1500, 10]],
+  attemptToFill: [
+    [1,0],
+  ]
+}
+
+export const STATIC_STONE: Material = {
+  id: 9,
+  name: "Static stone",
+  type: "staticMaterial",
+  conductivity: percent(0.1),
+  color: [80,80,80],
+  isVisible: true,
+  maxHeatColor: [180,30,15],
+  heatRetention: percent(0.9),
+}
+
+export const LAVA: Material = {
+  id: 10,
+  name: "Lava",
+  type: "physicsMaterial",
+  conductivity: percent(0.2),
+  subtype: {
+    type: "liquid",
+    viscosity: 50
+  },
+  density: 120,
+  color: [191, 45, 15],
+  heatRetention: percent(0.9),
+  maxHeatColor: [245, 152, 91],
+  minColorTemp: 1490,
+  coldConversions: [[1490, 8]],
+  initialTemp: 2500,
+  attemptToFill: [
+    [1,0],
+    [0,1],
+    [0,-1],
+    [1,1],
+    [1,-1],
+  ]
+}
+
+export const FIRE: Material = {
+  id: 11,
+  name: "Fire",
+  type: "physicsMaterial",
+  conductivity: percent(0.7),
+  subtype: {
+    type: "gas"
+  },
+  density: 0,
+  color: [235, 106, 7],
+  maxHeatColor: [255,255,255],
+  coldConversions: [[700, 12]],
+  initialTemp: 1600,
+  maxColorTemp: 1600,
+  heatRetention: percent(0.2),
+  attemptToFill: [
+    [-1,0],
+    [0,1],
+    [0,-1],
+    [-1,1],
+    [-1,-1],
+  ]
+}
+
+export const SMOKE: Material = {
+  id: 12,
+  name: "Smoke",
+  type: "physicsMaterial",
+  conductivity: percent(0.2),
+  subtype: {
+    type: "gas"
+  },
+  density: 0,
+  color: [80,80,80],
+  coldConversions: [[300, 0]],
+  initialTemp: 700,
+  heatRetention: percent(0.5),
+  attemptToFill: [
+    [-1,0],
+    [0,1],
+    [0,-1],
+    [-1,1],
+    [-1,-1],
   ]
 }
 
@@ -353,17 +270,13 @@ export const materials: Material[] = [
   AIR,
   STATIC_STONE,
   SAND,
-  SALT,
   STONE,
   WATER,
+  ICE,
   LAVA,
-  SALT_WATER,
   FIRE,
   WATER_VAPOUR,
   SMOKE,
-  MOLTEN_SALT,
-  GOO,
-  OIL,
   METAL,
   MOLTEN_METAL,
   STATIC_METAL

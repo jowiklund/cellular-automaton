@@ -1,7 +1,8 @@
 import { materials } from "./materials";
-import { createMaterial, hexToEntity } from "./util";
+import { createMaterial, hexToEntity, halfBuffer, clamp } from "./util";
 import { calculatePhysics } from "./physics";
 import { RenderBuffer } from "./types";
+import { MAX_INT } from "./constants";
 
 type CTX = CanvasRenderingContext2D;
 
@@ -33,7 +34,10 @@ const createRenderer = (ctx: CTX, width: number, height: number, resolution: num
         if (entity.material.type === "staticMaterial" && !entity.material.isVisible) continue;
         ctx.beginPath();
         if (entity.material.maxHeatColor && entity.state.temperature >= 0) {
-          const newColor = colorMixer(entity.material.maxHeatColor,entity.material.color, entity.state.temperature / 255)
+          const newColor = colorMixer(
+            entity.material.maxHeatColor,
+            entity.material.color,
+            clamp(entity.state.temperature - (entity.material.minColorTemp || 0), 0, MAX_INT) / (entity.material.maxColorTemp || MAX_INT))
           const [red,green,blue] = newColor;
           ctx.fillStyle = `rgb(${red},${green},${blue})`
         } else {
@@ -50,7 +54,7 @@ const createRenderer = (ctx: CTX, width: number, height: number, resolution: num
 }
 
 export function run(ctx: CTX, width: number, height: number) {
-  const resolution = 8;
+  const resolution = 6;
   const getRes = (resolution: number, value: number) => Math.floor(value/resolution)
   const buffer = [...Array(getRes(resolution, height))].map((_) => Array(getRes(resolution, width)).fill(createMaterial(0, materials)))
 

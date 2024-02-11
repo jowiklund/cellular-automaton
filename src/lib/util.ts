@@ -25,7 +25,7 @@ export const getRelativePosition = (buffer: RenderBuffer, y: number, x: number, 
 }
 
 export function parseHexTriplet(hex: string): [number, number, number] {
-  const pattern = /([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/
+  const pattern = /([a-f\d]{4})([a-f\d]{4})([a-f\d]{4})/
   const result = pattern.exec(hex)
   if (!result) return [0,0,0]
   return [
@@ -36,9 +36,19 @@ export function parseHexTriplet(hex: string): [number, number, number] {
 }
 
 function numberToHex(value?: number) {
-  if (!value) return `00`;
+  if (!value) return `0000`;
   const str = value.toString(16)
-  return str.length === 1 ? `0${str}` : str;
+  switch(str.length) {
+    case 4:
+      return str
+    case 3:
+      return `0${str}`
+    case 2:
+      return `00${str}`
+    case 1:
+      return `000${str}`
+  }
+  return str;
 }
 
 export function hexToEntity(hex: string, materials: Material[]): Entity {
@@ -63,7 +73,23 @@ export function entityToHex(entity: Entity): string {
 
 export const createMaterial = (id: number, materials: Material[], temperature?: number): string => {
   const material = materials.find(item => item.id === id) || AIR
-  return `${numberToHex(id)}${numberToHex(temperature || material.initialTemp)}00`
+  return `${numberToHex(id)}${numberToHex(temperature || material.initialTemp)}0000`
 }
 
 export const clamp = (number: number, min: number, max: number) => Math.max(min, Math.min(number, max));
+
+export function halfBuffer(buffer: RenderBuffer) {
+  let scaledBuffer = []
+  for (let i = 0; i < buffer.length; i++) {
+    const row = buffer[i] 
+    if (i % 2 !== 0) continue;
+    let newRow = []
+    for (let r = 0; r < row.length; r++) {
+      if (r % 2 === 0) {
+        newRow.push(row[r])
+      }
+    }
+    scaledBuffer.push(newRow)
+  }
+  return scaledBuffer;
+}

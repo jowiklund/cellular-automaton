@@ -11,12 +11,14 @@ export type MaterialBase = {
   color: RGB,
   name: string,
   conductivity: number
-  maxHeatColor?: RGB,
+  maxHeatColor?: RGB
   heatConversions?: [temp: number, materialId: number][]
   coldConversions?: [temp: number, materialId: number][]
   reactons?: [contactWith: number, creates: number][]
   heatRetention?: number
   initialTemp?: number
+  maxColorTemp?: number
+  minColorTemp?: number
 }
 
 type Solid = {
