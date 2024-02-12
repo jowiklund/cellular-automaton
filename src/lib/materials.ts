@@ -7,9 +7,11 @@ export const AIR: Material = {
   id: 0,
   name: "Air",
   type: "staticMaterial",
-  conductivity: 0,
+  conductivity: percent(0.01),
   color: [0,0,0],
-  isVisible: false
+  heatRetention: percent(0.1),
+  isVisible: false,
+  initialTemp: AMBIANCE
 }
 
 export const SAND: Material = {
@@ -61,8 +63,8 @@ export const ICE: Material = {
   conductivity: percent(0.9),
   color: [0,60,80],
   isVisible: true,
-  heatRetention: percent(0.5),
-  initialTemp: 250,
+  heatRetention: percent(0.9),
+  initialTemp: 80,
   heatConversions: [[274, 2]]
 }
 
@@ -144,6 +146,7 @@ export const METAL: Material = {
   heatRetention: percent(0.9),
   initialTemp: AMBIANCE,
   heatConversions: [[1811, 6]],
+  reactons: [[2, 13, 0.05]],
   attemptToFill: [
     [1,0],
     [1,1],
@@ -255,6 +258,30 @@ export const SMOKE: Material = {
   ]
 }
 
+export const RUST: Material = {
+  id: 13,
+  name: "Rust",
+  density: 230,
+  subtype: {
+    "type": "solid",
+    friction: 100
+  },
+  type: "physicsMaterial",
+  conductivity: percent(0.4),
+  color: [186, 82, 37],
+  maxHeatColor: [125, 53, 44],
+  maxColorTemp: 1900,
+  minColorTemp: 293,
+  heatRetention: percent(0.9),
+  initialTemp: AMBIANCE,
+  heatConversions: [[1900, 6]],
+  attemptToFill: [
+    [1,0],
+    [1,1],
+    [1,-1],
+  ]
+}
+
 export function parseMaterialState(state: MaterialState, materials: Material[]): Entity {
   const data = state.split(",").map(parseInt);
   return {
@@ -279,5 +306,6 @@ export const materials: Material[] = [
   SMOKE,
   METAL,
   MOLTEN_METAL,
-  STATIC_METAL
+  STATIC_METAL,
+  RUST
 ]

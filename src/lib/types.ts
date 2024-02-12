@@ -14,7 +14,7 @@ export type MaterialBase = {
   maxHeatColor?: RGB
   heatConversions?: [temp: number, materialId: number][]
   coldConversions?: [temp: number, materialId: number][]
-  reactons?: [contactWith: number, creates: number][]
+  reactons?: [contactWith: number, creates: number, chance: number][]
   heatRetention?: number
   initialTemp?: number
   maxColorTemp?: number

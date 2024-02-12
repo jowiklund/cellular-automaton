@@ -29,8 +29,6 @@ function doHeatDissipation(
 
     const n = read(neighborPosition.y, neighborPosition.x)
 
-    if (n.material.type === "staticMaterial" && !n.material.isVisible) continue;
-
     if (n.state.temperature > entity.state.temperature) continue;
 
     const nC = n.material.conductivity / MAX_INT;
@@ -75,9 +73,9 @@ function doReactons(
       if (neighborPosition.x === x && neighborPosition.y === y) continue;
 
       const neighbor = read(neighborPosition.y, neighborPosition.x)
-      const [contacting, convertTo] = material.reactons[c]
+      const [contacting, convertTo, chance] = material.reactons[c]
 
-      if (contacting === neighbor.material.id) {
+      if (contacting === neighbor.material.id && Math.random() < chance) {
         write(y, x, createMaterial(convertTo, materials, entity.state.temperature))
         if (Math.random() > 0.6) {
           write(neighborPosition.y, neighborPosition.x, createMaterial(0, materials))
