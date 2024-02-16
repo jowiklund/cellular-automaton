@@ -221,7 +221,7 @@ export const FIRE: Material = {
     type: "gas"
   },
   density: 0,
-  color: [235, 106, 7],
+  color: [252, 140, 3],
   maxHeatColor: [255,255,255],
   coldConversions: [[700, 12]],
   initialTemp: 1600,
@@ -288,7 +288,7 @@ export function parseMaterialState(state: MaterialState, materials: Material[]):
     material: materials[data[0]],
     state: {
       temperature: data[1],
-      velocity: data[2]
+      seed: data[2]
     }
   }
 }

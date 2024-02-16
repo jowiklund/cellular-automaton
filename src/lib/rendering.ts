@@ -1,5 +1,5 @@
 import { materials } from "./materials";
-import { createMaterial, hexToEntity, halfBuffer, clamp } from "./util";
+import { createMaterial, hexToEntity, halfBuffer, clamp, seedPercentage } from "./util";
 import { calculatePhysics } from "./physics";
 import { RenderBuffer } from "./types";
 import { MAX_INT } from "./constants";
@@ -20,13 +20,14 @@ function colorMixer(rgbA: number[], rgbB: number[], amountToMix: number){
 }
 
 let lastTime = 0;
-let interval = 1000/10;
+let interval = 1000/60;
 let timer = 0;
 
 const createRenderer = (ctx: CTX, width: number, height: number, resolution: number, timeStamp: number) => (buffer: RenderBuffer) => {
   const deltaTime = timeStamp - lastTime;
   lastTime = timeStamp;
   if (timer > interval) {
+    timer = 0;
     ctx.clearRect(0, 0, width, height)
     for (let y = 0; y < buffer.length; y++) {
       for (let x = 0; x < buffer[y].length; x++) {
@@ -75,15 +76,18 @@ export function run(ctx: CTX, width: number, height: number) {
   const draw = (e: MouseEvent) => {
     const x = Math.floor(e.x / resolution);
     const y = Math.floor(e.y / resolution);
-    buffer[y-1][x] = material
-    buffer[y-1][x-1] = material
-    buffer[y-1][x+1] = material
-    buffer[y][x] = material
-    buffer[y][x+1] = material
-    buffer[y][x-1] = material
-    buffer[y+1][x] = material
-    buffer[y+1][x-1] = material
-    buffer[y+1][x+1] = material
+    const size = 10;
+    const radius = Math.floor(size / 2)
+    for (let col = -radius; col <= radius; col++) {
+      for (let row = -radius; row <= radius; row++) {
+        if (Math.random() > 0.75) continue;
+        let colCoordinate = x + col
+        let rowCoordinate = y + row
+        if (colCoordinate > 0 && colCoordinate < buffer[0].length - 1 && rowCoordinate > 0 && rowCoordinate < buffer.length - 1) {
+          buffer[rowCoordinate][colCoordinate] = material;
+        }
+      }
+    }
   }
 
   window.addEventListener("mousedown", (e) => {

@@ -52,14 +52,14 @@ function numberToHex(value?: number) {
 }
 
 export function hexToEntity(hex: string, materials: Material[]): Entity {
-  const [id, temperature, velocity] = parseHexTriplet(hex)
+  const [id, temperature, seed] = parseHexTriplet(hex)
   const material = materials.find(item => item.id === id) || AIR;
   
   return {
     material,
     state: {
       temperature,
-      velocity
+      seed
     }
   }
 }
@@ -67,14 +67,16 @@ export function hexToEntity(hex: string, materials: Material[]): Entity {
 export function entityToHex(entity: Entity): string {
   const id = numberToHex(entity.material.id)
   const temperature = numberToHex(entity.state.temperature)
-  const velocity = numberToHex(entity.state.velocity)
-  return `${id}${temperature}${velocity}`
+  const seed = numberToHex(entity.state.seed)
+  return `${id}${temperature}${seed}`
 }
 
 export const createMaterial = (id: number, materials: Material[], temperature?: number): string => {
   const material = materials.find(item => item.id === id) || AIR
-  return `${numberToHex(id)}${numberToHex(temperature || material.initialTemp)}0000`
+  return `${numberToHex(id)}${numberToHex(temperature || material.initialTemp)}${numberToHex(Math.floor(Math.random() * 9999))}`
 }
+
+export const seedPercentage = (seed: number) => seed / 9999;
 
 export const clamp = (number: number, min: number, max: number) => Math.max(min, Math.min(number, max));
 

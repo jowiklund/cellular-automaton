@@ -54,6 +54,6 @@ export type Entity = {
   material: Material,
   state: {
     temperature: number,
-    velocity: number
+    seed: number
   }
 }

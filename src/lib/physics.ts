@@ -23,11 +23,11 @@ function doHeatDissipation(
   const write = createWriter(buffer)
   for (let i = 0; i < neighbors.length; i++) {
     const [nY, nX] = neighbors[i];
-    const neighborPosition = getRelativePosition(buffer, y, x, {y: nY, x: nX});
+    const nPosition = getRelativePosition(buffer, y, x, {y: nY, x: nX});
 
-    if (neighborPosition.x === x && neighborPosition.y === y) continue;
+    if (nPosition.x === x && nPosition.y === y) continue;
 
-    const n = read(neighborPosition.y, neighborPosition.x)
+    const n = read(nPosition.y, nPosition.x)
 
     if (n.state.temperature > entity.state.temperature) continue;
 
@@ -39,7 +39,7 @@ function doHeatDissipation(
     write(y, x, entityToHex(entity))
 
     n.state.temperature = clamp(n.state.temperature + heatTransfer, 0, MAX_INT)
-    write(neighborPosition.y, neighborPosition.x, entityToHex(n))
+    write(nPosition.y, nPosition.x, entityToHex(n))
   }
 
   if (entity.material.heatRetention !== undefined && Math.random() > entity.material.heatRetention / MAX_INT) {
@@ -113,24 +113,27 @@ function doColdConversions(buffer: RenderBuffer, y: number, x: number, entity: E
 export const calculatePhysics = (buffer: RenderBuffer, materials: Material[]) => (
   timeStamp: number,
   lastTime: number = 0,
-  interval: number = 1000/120,
-  timer: number = 0) => {
+  slowTickTimer: number = 0,
+  fastTickTimer: number = 0) => {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
-    //console.log(Math.floor(1000 / deltaTime))
-    if (timer > interval) {
+    const slowTick: number = 1000 / 10;
+    const fastTick: number = 1000 / 60;
+
+    const neighbors: [number,number][] = [
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+      [0, 1],
+    ];
+
+    if (slowTickTimer > slowTick) {
+      slowTickTimer = 0;
       for (let y = 0; y < buffer.length; y++) {
         for (let x = 0; x < buffer[y].length; x++) {
           const entity = hexToEntity(buffer[y][x], materials)
           const { material } = entity;
           if (material.type === "staticMaterial" && !material.isVisible) continue;
-
-          const neighbors: [number,number][] = [
-            [1, 0],
-            [0, -1],
-            [-1, 0],
-            [0, 1],
-          ];
 
           doHeatDissipation(buffer, x, y, entity, neighbors, materials)
 
@@ -139,15 +142,27 @@ export const calculatePhysics = (buffer: RenderBuffer, materials: Material[]) =>
 
           doReactons(buffer, x, y, entity, neighbors, materials)
 
+        }
+      }
+    } else {
+      slowTickTimer += deltaTime
+    }
+
+    if (fastTickTimer > fastTick) {
+      fastTickTimer = 0;
+      for (let y = 0; y < buffer.length; y++) {
+        for (let x = 0; x < buffer[y].length; x++) {
           if (Math.random() > 0.9) continue;
+          const entity = hexToEntity(buffer[y][x], materials)
+          const { material } = entity;
+          if (material.type === "staticMaterial" && !material.isVisible) continue;
 
           if (material.type === "physicsMaterial") {
             const rules = material.attemptToFill;
-            if (!buffer[y + 1]) continue;
 
             for (let p = 0; p < rules.length; p++) {
               const [newY, newX] = rules[p]
-              const pos = getRelativePosition(buffer, y, x, {y: newY, x: newX})
+              const pos = getRelativePosition(buffer, y, x, {y: newY, x: Math.random() > 0.5 ? newX : newX * -1})
 
               const occupied = hexToEntity(buffer[pos.y][pos.x], materials)
 
@@ -171,8 +186,8 @@ export const calculatePhysics = (buffer: RenderBuffer, materials: Material[]) =>
         }
       }
     } else {
-      timer += deltaTime;
+      fastTickTimer += deltaTime;
     }
-    requestAnimationFrame(t => calculatePhysics(buffer, materials)(t, lastTime, interval, timer))
+    requestAnimationFrame(timestamp => calculatePhysics(buffer, materials)(timestamp, lastTime, slowTickTimer, fastTickTimer))
   }
 
