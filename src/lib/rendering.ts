@@ -1,9 +1,8 @@
 import { materials } from "./materials";
-import { createMaterial, hexToEntity, halfBuffer, clamp, seedPercentage } from "./util";
+import { createMaterial } from "./util";
 import { calculatePhysics } from "./physics";
-import { Entity, RenderBuffer } from "./types";
+import { RenderBuffer } from "./types";
 import { Entity as ECS_Entity, IdComponent, PixelsComponent, PositionComponent, createPointer, createUpdater } from "./ecs";
-import { MAX_INT } from "./constants";
 import { EntityDB, MaterialEntity, createQuery, createSpawner } from "./ecs";
 import { Smiley } from "./entities";
 
@@ -106,8 +105,6 @@ const createRenderer = (ctx: CTX, resolution: number, config: RendererConfig = {
     }
   }
 
-
-
 const createMaterialE = (id: number, x: number, y: number): MaterialEntity => [
   {type: "material", id},
   {type: "position", x, y},
@@ -151,11 +148,12 @@ const createRendererProcess = (ctx: CTX, width: number, height: number, resoluti
 }
 
 export function run(ctx: CTX, width: number, height: number) {
-  const resolution = 6;
+  const resolution = 5;
   const getRes = (resolution: number, value: number) => Math.floor(value/resolution)
   const buffer = [...Array(getRes(resolution, height))].map((_) => Array(getRes(resolution, width)).fill(createMaterial(0, materials)))
   const entities: EntityDB = []
   const spawn = createSpawner(entities)
+
   spawn([
     {type: "id", value: 1},
     {type: "position", x: 50, y: 100},
@@ -230,11 +228,12 @@ export function run(ctx: CTX, width: number, height: number) {
     move(e)
     window.addEventListener("mousemove", move)
   })
+
   window.addEventListener("mouseup", () => {
     window.removeEventListener("mousemove", move)
   })
 
-  calculatePhysics(entities, materials)(0)
+  calculatePhysics(entities, materials, Math.floor(width / resolution), Math.floor(height / resolution))(0)
   const runRendererProcess = createRendererProcess(ctx, width, height, resolution, 0)
   runRendererProcess(entities)
 }

@@ -111,7 +111,7 @@ function doColdConversions(buffer: RenderBuffer, y: number, x: number, entity: E
   }
 }
 
-export const calculatePhysics = (db: EntityDB, materials: Material[]) => (
+export const calculatePhysics = (db: EntityDB, materials: Material[], width: number, height: number) => (
   timeStamp: number,
   lastTime: number = 0,
   slowTickTimer: number = 0,
@@ -157,21 +157,26 @@ export const calculatePhysics = (db: EntityDB, materials: Material[]) => (
         const entity = db[index]
         const velocity = entity.find(i => i.type === "velocity") as VelocityComponent
         if (!velocity) continue;
+        console.log(width, height)
         update(entity, (data) => {
-          const p = data.map(e => e.type === "position"
-            ? ({...e,
-              y: e.y + velocity.y,
-              x: e.x + velocity.x
-            })
-            : (e))
-
-          const v = p.map(e => e.type === "velocity"
-            ? ({...e, 
-              y: clamp(e.y + Math.sqrt(e.y) * 0.3, -10, 10), 
-              x: clamp(e.x - Math.sqrt(e.x) * 0.3, 0, 10)
-            })
-            : (e))
-          return v
+          return data.map(component => {
+            switch(component.type) {
+              case "position":
+                return {
+                  ...component,
+                  x: clamp(component.x + velocity.x, 0, width),
+                  y: clamp(component.y + velocity.y, 0, height),
+                }
+              case "velocity":
+                return {
+                  ...component,
+                  y: clamp(component.y + Math.sqrt(component.y) * 0.3, -10, 10), 
+                  x: clamp(component.x - Math.sqrt(component.x) * 0.3, 0, 10)
+                }
+              default:
+                return component
+            }
+          });
         })
       }
 
@@ -213,6 +218,6 @@ export const calculatePhysics = (db: EntityDB, materials: Material[]) => (
     } else {
       fastTickTimer += deltaTime;
     }
-    requestAnimationFrame(timestamp => calculatePhysics(db, materials)(timestamp, lastTime, slowTickTimer, fastTickTimer))
+    requestAnimationFrame(timestamp => calculatePhysics(db, materials, width, height)(timestamp, lastTime, slowTickTimer, fastTickTimer))
   }
 
