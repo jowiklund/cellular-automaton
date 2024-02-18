@@ -21,22 +21,12 @@ function app() {
   spawn([{type: "id", value: 1},{type: "position", x: 10, y: 10}, {type: "temperature", temp: 1}])
   spawn([{type: "position", x: 1, y: 1}, {type: "temperature", temp: 1}])
 
-  console.log(query([
-    {type: "id", value: 1},
-  ]))
-
   update([{type: "id", value: 1}], (data) => {
     return data.map(e => e.type ==="position" ? ({
     ...e,
     y: e.y+1
     }) : (e)) 
   })
-
-  console.log(query([
-    {type: "id", value: 1},
-  ]))
-
-  console.log(db)
 }
 
 app();

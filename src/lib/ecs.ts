@@ -42,11 +42,10 @@ export const createQuery = (db: EntityDB) => (query: Entity): Entity[] => {
     return queryTypes.includes(c.type)
   }))
 
-  return includesQueryType.filter(
-    e => e
-      .map(c => JSON.stringify(c))
-      .some(i => i === queryString)
-  )
+  const signature = (e: Entity) => e.filter(e => queryTypes.includes(e.type)).map(i => JSON.stringify(i)).join("")
+  return includesQueryType.filter(e => {
+    return signature(e) === queryString;
+  })
 }
 
 export const createPointer = (db: EntityDB) => (x: number, y: number) => {
@@ -68,5 +67,4 @@ export const createPointer = (db: EntityDB) => (x: number, y: number) => {
 
     return currDsq < accDsq ? curr : acc
   }, [])
-
 }

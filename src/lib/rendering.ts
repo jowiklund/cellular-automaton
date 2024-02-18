@@ -2,9 +2,10 @@ import { materials } from "./materials";
 import { createMaterial, hexToEntity, halfBuffer, clamp, seedPercentage } from "./util";
 import { calculatePhysics } from "./physics";
 import { Entity, RenderBuffer } from "./types";
-import { Entity as ECS_Entity, PixelsComponent, PositionComponent, createPointer, createUpdater } from "./ecs";
+import { Entity as ECS_Entity, IdComponent, PixelsComponent, PositionComponent, createPointer, createUpdater } from "./ecs";
 import { MAX_INT } from "./constants";
 import { EntityDB, MaterialEntity, createQuery, createSpawner } from "./ecs";
+import { Smiley } from "./entities";
 
 type CTX = CanvasRenderingContext2D;
 
@@ -116,7 +117,7 @@ const createMaterialE = (id: number, x: number, y: number): MaterialEntity => [
 ]
 const createRendererProcess = (ctx: CTX, width: number, height: number, resolution: number, timeStamp: number) => (db: EntityDB) => {
   const render = createRenderer(ctx, resolution, {
-    boundaries: true
+    boundaries: false
   })
   const deltaTime = timeStamp - lastTime;
   lastTime = timeStamp;
@@ -158,27 +159,14 @@ export function run(ctx: CTX, width: number, height: number) {
   spawn([
     {type: "id", value: 1},
     {type: "position", x: 50, y: 100},
-    {type: "pixels", data: [
-      [[235, 174, 52,0],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,0]],
-      [[235, 174, 52,1],[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1],[235, 174, 52,1]],
-      [[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1]],
-      [[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1]],
-      [[235, 174, 52,1],[235, 174, 52,1],[0,0,0,1],[0,0,0,1],[0,0,0,1],[235, 174, 52,1],[235, 174, 52,1]],
-      [[235, 174, 52,0],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,0]],
-    ]}
+    Smiley
   ])
 
   spawn([
     {type: "id", value: 2},
     {type: "position", x: 100, y: 50},
-    {type: "pixels", data: [
-      [[235, 174, 52,0],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,0]],
-      [[235, 174, 52,1],[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1],[235, 174, 52,1]],
-      [[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1]],
-      [[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[0,0,0,1],[235, 174, 52,1]],
-      [[235, 174, 52,1],[235, 174, 52,1],[0,0,0,1],[0,0,0,1],[0,0,0,1],[235, 174, 52,1],[235, 174, 52,1]],
-      [[235, 174, 52,0],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,1],[235, 174, 52,0]],
-    ]}
+    {type: "velocity", x: 10, y: 1},
+    Smiley
   ])
 
   const materialSelector = document.querySelector("#material") as HTMLInputElement;
@@ -199,40 +187,54 @@ export function run(ctx: CTX, width: number, height: number) {
   const update = createUpdater(entities, query)
   const point = createPointer(entities)
   let selected: ECS_Entity = []
+
+  console.log(query([
+    {type: "id", value: 1},
+    {type: "position", x: 50, y: 100}
+  ]))
+
   const draw = (e: MouseEvent) => {
     const x = Math.floor(e.x / resolution);
     const y = Math.floor(e.y / resolution);
-    selected = point(x, y);
-    const id = selected.find(i => i.type === "id")
-    if (id) {
-      update([id], (data) => {
-        return data.map(e => e.type === "position" ? ({...e, y, x}) : (e))
-      })
+    const size = 5;
+    const radius = Math.floor(size / 2)
+    for (let col = -radius; col <= radius; col++) {
+      for (let row = -radius; row <= radius; row++) {
+        let colCoordinate = x + col
+        let rowCoordinate = y + row
+        if (colCoordinate > 0 && colCoordinate < buffer[0].length - 1 && rowCoordinate > 0 && rowCoordinate < buffer.length - 1) {
+          spawn(createMaterialE(2, colCoordinate, rowCoordinate))
+          buffer[rowCoordinate][colCoordinate] = material;
+        }
+      }
     }
+  }
 
-    // const size = 5;
-    // const radius = Math.floor(size / 2)
-    // for (let col = -radius; col <= radius; col++) {
-    //   for (let row = -radius; row <= radius; row++) {
-    //     let colCoordinate = x + col
-    //     let rowCoordinate = y + row
-    //     if (colCoordinate > 0 && colCoordinate < buffer[0].length - 1 && rowCoordinate > 0 && rowCoordinate < buffer.length - 1) {
-    //       spawn(createMaterialE(2, colCoordinate, rowCoordinate))
-    //       buffer[rowCoordinate][colCoordinate] = material;
-    //     }
-    //   }
-    // }
+  const move = (e: MouseEvent) => {
+    const x = Math.round(e.x / resolution * 100) / 100;
+    const y = Math.round(e.y / resolution * 100) / 100;
+    selected = point(x, y);
+    const id = selected.find(i => i.type === "id") as IdComponent
+    const pixels = selected.find(i => i.type === "pixels") as PixelsComponent
+    const pos = selected.find(i => i.type === "position") as PositionComponent
+    if (id && pixels && pos) {
+      if (x <= pos.x + pixels.data[0].length && x >= pos.x && y <= pos.y && y >= pos.y - pixels.data.length) {
+        update([id], (data) => {
+          return data.map(e => e.type === "position" ? ({...e, y: y + pixels.data.length / 2, x: x - pixels.data[0].length / 2}) : (e))
+        })
+      }
+    }
   }
 
   window.addEventListener("mousedown", (e) => {
-    draw(e)
-    window.addEventListener("mousemove", draw)
+    move(e)
+    window.addEventListener("mousemove", move)
   })
   window.addEventListener("mouseup", () => {
-    window.removeEventListener("mousemove", draw)
+    window.removeEventListener("mousemove", move)
   })
 
-  calculatePhysics(buffer, materials)(0)
+  calculatePhysics(entities, materials)(0)
   const runRendererProcess = createRendererProcess(ctx, width, height, resolution, 0)
   runRendererProcess(entities)
 }
