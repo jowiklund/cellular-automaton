@@ -1,4 +1,4 @@
-import { materials } from "./lib/materials";
+import { EntityDB, createQuery, createSpawner, createUpdater } from "./lib/ecs";
 import { run } from "./lib/rendering"
 
 function app() {
@@ -11,6 +11,32 @@ function app() {
     if (!ctx) return;
     run(ctx, canvas.width, canvas.height);
   }
+
+  const db: EntityDB = []
+
+  const query = createQuery(db)
+  const spawn = createSpawner(db)
+  const update = createUpdater(db, query)
+
+  spawn([{type: "id", value: 1},{type: "position", x: 10, y: 10}, {type: "temperature", temp: 1}])
+  spawn([{type: "position", x: 1, y: 1}, {type: "temperature", temp: 1}])
+
+  console.log(query([
+    {type: "id", value: 1},
+  ]))
+
+  update([{type: "id", value: 1}], (data) => {
+    return data.map(e => e.type ==="position" ? ({
+    ...e,
+    y: e.y+1
+    }) : (e)) 
+  })
+
+  console.log(query([
+    {type: "id", value: 1},
+  ]))
+
+  console.log(db)
 }
 
 app();

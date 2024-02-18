@@ -24,6 +24,11 @@ export const getRelativePosition = (buffer: RenderBuffer, y: number, x: number, 
   return { x: newX, y: newY }
 }
 
+export function parseHex(hex: string): number[] {
+  const res =  hex.match(/.{1,4}/g)?.map(i => parseInt(i, 16))
+  return res || [1]
+}
+
 export function parseHexTriplet(hex: string): [number, number, number] {
   const pattern = /([a-f\d]{4})([a-f\d]{4})([a-f\d]{4})/
   const result = pattern.exec(hex)
@@ -35,7 +40,7 @@ export function parseHexTriplet(hex: string): [number, number, number] {
   ]
 }
 
-function numberToHex(value?: number) {
+export function numberToHex(value?: number) {
   if (!value) return `0000`;
   const str = value.toString(16)
   switch(str.length) {
